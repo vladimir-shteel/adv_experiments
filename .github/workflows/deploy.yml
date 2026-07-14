@@ -14,6 +14,20 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  # Владелец всех приватных репозиториев-источников
+  OWNER: vladimir-shteel
+
+  # ─────────────────────────────────────────────────────────────
+  #  СПИСОК ПРОТОТИПОВ.  Чтобы добавить ещё один — допиши одну строку:
+  #      имя-страницы | репозиторий | ветка
+  #  (пробелы вокруг | не важны, выравнивай как удобно)
+  # ─────────────────────────────────────────────────────────────
+  PROTOTYPES: |
+    fighting-dudes | FightingDudes  | codex/fmfm-b-garrison-buff
+    dice-lords     | DiceLordEredan | main
+    bagtd          | PBBTD          | master
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,40 +36,27 @@ jobs:
       - name: Checkout showcase
         uses: actions/checkout@v4
 
-      # --- Прототипы из приватных репозиториев ---
-      - name: Checkout Fighting Dudes (garrison branch)
-        uses: actions/checkout@v4
-        with:
-          repository: vladimir-shteel/FightingDudes
-          ref: codex/fmfm-b-garrison-buff
-          token: ${{ secrets.PRIVATE_REPOS_PAT }}
-          path: src-fighting-dudes
-
-      - name: Checkout Dice Lords Eredan (main)
-        uses: actions/checkout@v4
-        with:
-          repository: vladimir-shteel/DiceLordEredan
-          ref: main
-          token: ${{ secrets.PRIVATE_REPOS_PAT }}
-          path: src-dice-lords
-
-      # --- Сборка _site ---
       - name: Assemble site
+        env:
+          TOKEN: ${{ secrets.PRIVATE_REPOS_PAT }}
         run: |
           set -euo pipefail
           mkdir -p _site
-
-          # Лендинг
           cp index.html _site/index.html
 
-          # Каждый прототип — в свою подпапку, без .git
-          for name in fighting-dudes:src-fighting-dudes dice-lords:src-dice-lords; do
-            page="${name%%:*}"
-            src="${name##*:}"
-            mkdir -p "_site/$page"
-            cp -r "$src/." "_site/$page/"
+          while IFS='|' read -r page repo ref; do
+            # обрезаем пробелы по краям
+            page="$(echo "$page" | xargs || true)"
+            repo="$(echo "$repo" | xargs || true)"
+            ref="$(echo "$ref"  | xargs || true)"
+            [ -z "$page" ] && continue   # пропускаем пустые строки
+
+            echo "→ $page  ($OWNER/$repo @ $ref)"
+            git clone --depth 1 --branch "$ref" --quiet \
+              "https://x-access-token:${TOKEN}@github.com/${OWNER}/${repo}.git" \
+              "_site/$page"
             rm -rf "_site/$page/.git"
-          done
+          done <<< "$PROTOTYPES"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
