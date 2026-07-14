@@ -1,0 +1,74 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Витрина (лендинг index.html лежит в этом же репозитории)
+      - name: Checkout showcase
+        uses: actions/checkout@v4
+
+      # --- Прототипы из приватных репозиториев ---
+      - name: Checkout Fighting Dudes (garrison branch)
+        uses: actions/checkout@v4
+        with:
+          repository: vladimir-shteel/FightingDudes
+          ref: codex/fmfm-b-garrison-buff
+          token: ${{ secrets.PRIVATE_REPOS_PAT }}
+          path: src-fighting-dudes
+
+      - name: Checkout Dice Lords Eredan (main)
+        uses: actions/checkout@v4
+        with:
+          repository: vladimir-shteel/DiceLordEredan
+          ref: main
+          token: ${{ secrets.PRIVATE_REPOS_PAT }}
+          path: src-dice-lords
+
+      # --- Сборка _site ---
+      - name: Assemble site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+
+          # Лендинг
+          cp index.html _site/index.html
+
+          # Каждый прототип — в свою подпапку, без .git
+          for name in fighting-dudes:src-fighting-dudes dice-lords:src-dice-lords; do
+            page="${name%%:*}"
+            src="${name##*:}"
+            mkdir -p "_site/$page"
+            cp -r "$src/." "_site/$page/"
+            rm -rf "_site/$page/.git"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
