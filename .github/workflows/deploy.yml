@@ -27,6 +27,7 @@ env:
     fighting-dudes | FightingDudes  | codex/fmfm-b-garrison-buff
     dice-lords          | DiceLordEredan | main
     dice-lords-original | DiceLordEredan | original_idea
+    dice-lords-heroes   | DiceLordEredan | turn_based_heroes
     bagtd               | PBBTD          | master
 
 jobs:
