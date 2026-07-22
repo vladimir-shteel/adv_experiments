@@ -28,6 +28,7 @@ env:
     dice-lords          | DiceLordEredan | main
     dice-lords-original | DiceLordEredan | original_idea
     dice-lords-heroes   | DiceLordEredan | turn_based_heroes
+    dice-lords-waves    | DiceLordEredan | wave_phases
     bagtd               | PBBTD          | master
 
 jobs:
