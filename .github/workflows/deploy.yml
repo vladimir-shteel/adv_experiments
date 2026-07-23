@@ -29,6 +29,7 @@ env:
     dice-lords-original | DiceLordEredan | original_idea
     dice-lords-heroes   | DiceLordEredan | turn_based_heroes
     dice-lords-waves    | DiceLordEredan | wave_phases
+    dice-lords-endless  | DiceLordEredan | endless_accumulation
     bagtd               | PBBTD          | master
 
 jobs:
