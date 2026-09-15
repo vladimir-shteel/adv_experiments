@@ -24,7 +24,8 @@ env:
   #  (пробелы вокруг | не важны, выравнивай как удобно)
   # ─────────────────────────────────────────────────────────────
   PROTOTYPES: |
-    fighting-dudes | FightingDudes  | codex/fmfm-b-garrison-buff
+    fighting-dudes-fortress-merge      | FightingDudes  | codex/fortress-merge-from-master
+    fighting-dudes      | FightingDudes  | codex/fmfm-b-garrison-buff
     dice-lords          | DiceLordEredan | main
     dice-lords-original | DiceLordEredan | original_idea
     dice-lords-heroes   | DiceLordEredan | turn_based_heroes
